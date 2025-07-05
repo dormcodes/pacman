@@ -302,17 +302,33 @@ Pacman.User = function (game, map) {
         return score;
     };
 
-  function loseLife() {
-    console.log("⚠️ loseLife() called"); // DEBUG: Confirm function is triggered
+function loseLife() {
+    console.log("⚠️ loseLife() called"); // Confirm it's being called
+
     setState(WAITING);
     user.loseLife();
 
     if (user.getLives() > 0) {
         startLevel();
     } else {
-        const finalScore = user.theScore || 0;
-        console.log("🎯 Game Over — Submitting score:", finalScore); // DEBUG
-        submitScore(finalScore);
+        console.log("🎯 Game Over");
+
+        // ✅ Get final score (fallback to 0)
+        let finalScore = 0;
+        if (user && typeof user.getScore === 'function') {
+            finalScore = user.getScore(); // safer method
+        } else if (user.theScore) {
+            finalScore = user.theScore;
+        }
+
+        console.log("🎯 Submitting score:", finalScore);
+
+        // ✅ Submit only if submitScore exists
+        if (typeof submitScore === "function") {
+            submitScore(finalScore);
+        } else {
+            console.warn("submitScore() not defined");
+        }
     }
 }
 
