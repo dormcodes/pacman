@@ -2,57 +2,154 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>HTML5 Pacman</title>
-    
+    <title>DORM ROOM PACMAN CHAMPIONSHIP GAMES</title>
+
     <style type="text/css">
       @font-face {
-	    font-family: 'BDCartoonShoutRegular';
+        font-family: 'BDCartoonShoutRegular';
         src: url('BD_Cartoon_Shout-webfont.ttf') format('truetype');
-	    font-weight: normal;
-	    font-style: normal;
+        font-weight: normal;
+        font-style: normal;
       }
       #pacman {
-        height:450px;
-        width:342px;
-        margin:20px auto;
+        height: 450px;
+        width: 342px;
+        margin: 20px auto;
       }
-      #shim { 
-        font-family: BDCartoonShoutRegular; 
-        position:absolute;
-        visibility:hidden
+      #shim {
+        font-family: BDCartoonShoutRegular;
+        position: absolute;
+        visibility: hidden;
       }
-      h1 { font-family: BDCartoonShoutRegular; text-align:center; }
-      body { width:342px; margin:0px auto; font-family:sans-serif; }
-      a { text-decoration:none; }
+      h1 {
+        font-family: BDCartoonShoutRegular;
+        text-align: center;
+      }
+      body {
+        width: 342px;
+        margin: 0px auto;
+        font-family: sans-serif;
+      }
+      a {
+        text-decoration: none;
+      }
+      #leaderboard {
+        margin-top: 30px;
+        text-align: center;
+      }
+      #leaderboard-list {
+        padding: 0;
+        list-style: none;
+        font-size: 14px;
+      }
     </style>
+  </head>
 
-</head>
+  <body>
+    <!-- Start screen -->
+    <div id="start-screen" style="text-align: center; margin-top: 50px;">
+      <h2>Enter your name to play:</h2>
+      <input type="text" id="player-name" placeholder="Your name" />
+      <br /><br />
+      <button onclick="startGame()">Start Game</button>
+    </div>
 
-<body>
-  
-  <div id="shim">shim for font face</div>
+    <div id="shim">shim for font face</div>
+    <h1>HTML5 Pacman</h1>
 
-  <h1>HTML5 Pacman</h1>
+    <div id="pacman"></div>
 
-  <a href="http://arandomurl.com/">Writeup</a> |
-  Code on <a href="http://arandomurl.com/">Github</a>
+    <!-- Leaderboard -->
+    <div id="leaderboard">
+      <h3>Top 10 Leaderboard</h3>
+      <ul id="leaderboard-list"></ul>
+    </div>
 
-  <div id="pacman"></div>
-  <script src="pacman.js"></script>
-  <script src="modernizr-1.5.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <script>
+    <!-- Initialize Firebase -->
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDC_GjIpVHo7F3KPaD9y4VJqshrgmNdrgs",
+        authDomain: "pacman-leaderboard-b9b05.firebaseapp.com",
+        projectId: "pacman-leaderboard-b9b05",
+        storageBucket: "pacman-leaderboard-b9b05.appspot.com",
+        messagingSenderId: "739819494499",
+        appId: "1:739819494499:web:0a6f74024b2bf1950b6c56",
+        measurementId: "G-JDSH8TX238"
+      };
 
-    var el = document.getElementById("pacman");
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+    </script>
 
-    if (Modernizr.canvas && Modernizr.localstorage && 
-        Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
-      window.setTimeout(function () { PACMAN.init(el, "./"); }, 0);
-    } else { 
-      el.innerHTML = "Sorry, needs a decent browser<br /><small>" + 
-        "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
-    }
-  </script>
+    <!-- Pacman game files -->
+    <script src="modernizr-1.5.min.js"></script>
+    <script src="pacman.js"></script>
 
-</body>
+    <!-- Game + Firebase logic -->
+    <script>
+      function submitScore(score) {
+        const name = localStorage.getItem('playerName') || 'Anonymous';
+        db.collection("leaderboard").add({
+          name: name,
+          score: score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          console.log("✅ Score submitted.");
+        }).catch((err) => {
+          console.error("❌ Error submitting score:", err);
+        });
+      }
+
+      function loadLeaderboard() {
+        db.collection("leaderboard")
+          .orderBy("score", "desc")
+          .limit(10)
+          .onSnapshot((snapshot) => {
+            const list = document.getElementById("leaderboard-list");
+            list.innerHTML = "";
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              const li = document.createElement("li");
+              li.textContent = `${data.name}: ${data.score}`;
+              list.appendChild(li);
+            });
+          });
+      }
+
+      function startGame() {
+        const nameInput = document.getElementById("player-name");
+        const name = nameInput.value.trim();
+        if (name === "") {
+          alert("Please enter your name.");
+          return;
+        }
+        localStorage.setItem("playerName", name);
+        document.getElementById("start-screen").style.display = "none";
+      }
+
+      window.onload = function () {
+        var el = document.getElementById("pacman");
+
+        if (
+          Modernizr.canvas &&
+          Modernizr.localstorage &&
+          Modernizr.audio &&
+          (Modernizr.audio.ogg || Modernizr.audio.mp3)
+        ) {
+          window.setTimeout(function () {
+            PACMAN.init(el, "./");
+          }, 0);
+        } else {
+          el.innerHTML =
+            "Sorry, needs a decent browser<br /><small>(Firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+        }
+
+        loadLeaderboard();
+      };
+    </script>
+  </body>
 </html>
