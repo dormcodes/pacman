@@ -513,7 +513,7 @@ function loseLife() {
         if (amount >= 1) { 
             return;
         }
-
+}
         ctx.fillStyle = "#FFFF00";
         ctx.beginPath();        
         ctx.moveTo(((position.x/10) * size) + half, 
