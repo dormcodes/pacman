@@ -686,7 +686,7 @@ Pacman.Map = function (size) {
         if (layout === Pacman.PILL) {
             return;
         }
-
+    }
         ctx.beginPath();
         
         if (layout === Pacman.EMPTY || layout === Pacman.BLOCK || 
