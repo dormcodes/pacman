@@ -303,34 +303,40 @@ Pacman.User = function (game, map) {
     };
 
 function loseLife() {
-    console.log("⚠️ loseLife() called"); // Confirm it's being called
+    try {
+        console.log("⚠️ loseLife() called");
 
-    setState(WAITING);
-    user.loseLife();
+        setState(WAITING);
+        user.loseLife();
 
-    if (user.getLives() > 0) {
-        startLevel();
-    } else {
-        console.log("🎯 Game Over");
-
-        // ✅ Get final score (fallback to 0)
-        let finalScore = 0;
-        if (user && typeof user.getScore === 'function') {
-            finalScore = user.getScore(); // safer method
-        } else if (user.theScore) {
-            finalScore = user.theScore;
-        }
-
-        console.log("🎯 Submitting score:", finalScore);
-
-        // ✅ Submit only if submitScore exists
-        if (typeof submitScore === "function") {
-            submitScore(finalScore);
+        if (user.getLives() > 0) {
+            startLevel();
         } else {
-            console.warn("submitScore() not defined");
+            console.log("🎯 Game Over");
+
+            let finalScore = 0;
+
+            // Safely get the player's score
+            if (user && typeof user.getScore === 'function') {
+                finalScore = user.getScore();
+            } else if (typeof user.theScore === 'number') {
+                finalScore = user.theScore;
+            }
+
+            console.log("🎯 Submitting score:", finalScore);
+
+            // Only submit if the function exists
+            if (typeof submitScore === "function") {
+                submitScore(finalScore);
+            } else {
+                console.warn("submitScore() not defined yet.");
+            }
         }
+    } catch (err) {
+        console.error("🔥 Error in loseLife():", err);
     }
 }
+
 
 
     };
