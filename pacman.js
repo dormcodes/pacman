@@ -302,22 +302,20 @@ Pacman.User = function (game, map) {
         return score;
     };
 
-   function loseLife() {
+  function loseLife() {
+    console.log("⚠️ loseLife() called"); // DEBUG: Confirm function is triggered
     setState(WAITING);
     user.loseLife();
 
     if (user.getLives() > 0) {
         startLevel();
     } else {
-        // ✅ Game over — submit score to Firestore
         const finalScore = user.theScore || 0;
-        console.log("Game over. Submitting score:", finalScore); // for debugging
+        console.log("🎯 Game Over — Submitting score:", finalScore); // DEBUG
         submitScore(finalScore);
-
-        // Optional: show leaderboard or restart screen
-        // Example: alert("Game Over! Final Score: " + finalScore);
     }
 }
+
 
     };
 
